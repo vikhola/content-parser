@@ -1,0 +1,39 @@
+{
+  "name": "@vikhola/content-parser",
+  "version": "1.0.0",
+  "description": "Provides a simple infrastructure vikhola framework module for parsing request content",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vikhola/content-parser"
+  },
+  "homepage": "https://github.com/vikhola/content-parser",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@vikhola/content-type": "^1.0.0",
+    "bytes": "^3.1.2"
+  },
+  "devDependencies": {
+    "vikhola": "^1.0.2"
+  },
+  "keywords": [
+    "vikhola",
+    "body",
+    "content",
+    "content-parser",
+    "request-body",
+    "bodyParser",
+    "body-parser",
+    "json",
+    "text"
+  ],
+  "author": "<sabaziosd@proton.me> (https://github.com/SabaziosD)",
+  "license": "MIT",
+  "types": "./index.d.ts"
+}
