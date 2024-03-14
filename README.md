@@ -257,6 +257,14 @@ The `strategy.parse()` method parses the provided source and return promise with
 strategy.parse(request, source);
 ```
 
+For example, this method can be extended and the returned string or buffer processed by a more specific parser.
+
+```js
+strategy.parse(request, source) {
+	return super.parse(request, source).then(content => parseXML(content));
+}
+```
+
 ## License
 
 [MIT](https://github.com/vikhola/content-parser/blob/main/LICENSE)
