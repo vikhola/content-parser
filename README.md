@@ -32,7 +32,7 @@ To start using parser enough to initialize it and subscribe to the desirable sco
 const server = new Server();
 const parser = new ContentParser();
 
-parser.subscribe(server);
+parser.parse(server);
 
 server.post('/', (request) => {
 	// some logic	
@@ -42,7 +42,7 @@ server.post('/', (request) => {
 Parser will parse the request body by the strategy whose key exactly or as closely as possible matches the request `Content-Type` header by its type and every parameter.
 
 ```js
-parser.subscribe(server);
+parser.parse(server);
 
 // POST / HTTP 1.1
 // Content-Type: 'application/json; foo=bar; bar=foo'
@@ -184,18 +184,19 @@ console.log(parser.has('application/xml'));
 
 ### parser.parse(event)
 
-The `parser.parse()` method parses body of the provided event using a strategy whose key exactly or as closely as possible matches the `Content-Type` of the request.
+The `parser.parse()` method subscribes with the provided parameters to the target `kernel.parse` event, during which parses its body using a strategy whose key matches exactly or as closely as possible the `Content-Type` of the request.
 
 ```js
 const strategy = { parse(request, source) { return 'bar' } };
 
 parser.set('application/xml', strategy);
 
+// POST / HTTP 1.1
 // Content-Type: 'application/xml'
-parser.parse(event);
-
-// print: bar
-console.log(event.body);
+server.post('/', (request) => {
+	// print: bar
+	console.log(request.body);
+});
 ```
 
 ### parser.clear()
@@ -213,40 +214,24 @@ parser.clear();
 console.log(parser.has('application/xml'));
 ```
 
-### parser.subscribe(target[, priority])
-
-The `parser.subscribe()` method subscribes to the event target `kernel.parse` event with provided optional priority.
-
-```js
-parser.subscribe(server, 10)
-```
-
-### parser.unsubscribe(target)
-
-The `parser.unsubscribe()` method unsubscribes from the `kernel.parse` event.
-
-```js
-parser.unsubscribe(server)
-```
-
-## ContentParserStrategy
+## ContentParserStrategies
 
 Except parser, module also exports a default strategy and its more specialized versions as `JSONContentParserStrategy` and `TextContentParserStrategy` which helps parse the provided request body and return a promise with its contents. The strategy accepts an optional `limit` and `type` parameters.
 
 ```js
-const strategy = new ContentParserStrategy({ limit: '10mb', type: 'string' });
+const strategy = new BaseContentParserStrategy({ limit: '10mb', type: 'string' });
 ```
 
 The `limit` parameter specifies the maximum content size that will cause an error if exceeded. The limit can be represented as a number of bytes or a string with a number and its units.
 
 ```js
-const strategy = new ContentParserStrategy({ limit: '1mb' });
+const strategy = new BaseContentParserStrategy({ limit: '1mb' });
 ```
 
 The `type` parameter specifies the type of data returned by the `parse()` method. It could be `buffer` or `string`. By default its equal to `buffer`. 
 
 ```js
-const strategy = new ContentParserStrategy({ type: 'string' });
+const strategy = new BaseContentParserStrategy({ type: 'string' });
 ```
 
 ### strategy.parse(request, source)

@@ -1,58 +1,53 @@
 declare module '@vikhola/content-parser' {
 
     import { IncomingMessage } from 'http'
-    import { IEventTarget } from 'vikhola/types/target'
-    import { IHttpRequest } from 'vikhola/types/request'
-    import { IServerParseEvent } from 'vikhola/types/events'
+    import { ListenerOptions } from '@vikhola/events'
+    import { KernelEmitter, HttpRequest } from 'vikhola'
 
     type ContentParserStrategyOptions = {
         limit: string | number
         type: 'string' | 'buffer'
     }
 
-    type DefaultContentParserStrategyOptions = {
-        limit: string | number
-    }
-
-    interface IContentParserStrategy {
+    interface ContentParserStrategy {
         /**
          * The `strategy.parse()` method parses the provided source and return promise with its content.
          * 
          * @param request Request with metadata. 
          * @param source Source to parse.
          */
-        parse(request: IHttpRequest, source: IncomingMessage): any
+        parse(request: HttpRequest, source: IncomingMessage): any
     }
 
-    export class ContentParserStrategy<T = Buffer | string> implements IContentParserStrategy {
+    export class BaseContentParserStrategy<T = Buffer | string> implements ContentParserStrategy {
         /** 
          * @param options.type The `type` parameter specifies the type of data returned by the `parse()` method. 
          * @param options.limit The `limit` parameter specifies the maximum content size that will cause an error if exceeded.
          */
         constructor(options: ContentParserStrategyOptions);
-        parse(request: IHttpRequest, source: IncomingMessage): Promise<T>
+        parse(request: HttpRequest, source: IncomingMessage): Promise<T>
     }
 
-    export class TextContentParserStrategy extends ContentParserStrategy<string> {
+    export class TextContentParserStrategy extends BaseContentParserStrategy<string> {
         /** 
          * @param options.limit The `limit` parameter specifies the maximum content size that will cause an error if exceeded.
          */
-        constructor(options: DefaultContentParserStrategyOptions);
+        constructor(options: Omit<ContentParserStrategyOptions, "type">);
         /**
          * The `strategy.parse()` method parse  the provided source as JSON and return promise with its content.
          */
-        parse(request: IHttpRequest, source: IncomingMessage): Promise<string>
+        parse(request: HttpRequest, source: IncomingMessage): Promise<string>
     }
 
-    export class JSONContentParserStrategy extends ContentParserStrategy<{ [key: string]: any }> {
+    export class JSONContentParserStrategy extends BaseContentParserStrategy<{ [key: string]: any }> {
         /** 
          * @param options.limit The `limit` parameter specifies the maximum content size that will cause an error if exceeded.
          */
-        constructor(options: DefaultContentParserStrategyOptions);
+        constructor(options: Omit<ContentParserStrategyOptions, "type">);
         /**
          * The `strategy.parse()` method parses the provided source and return promise with its content as a string.
          */
-        parse(request: IHttpRequest, source: IncomingMessage): Promise<{ [key: string]: any }>
+        parse(request: HttpRequest, source: IncomingMessage): Promise<{ [key: string]: any }>
     }
 
     export class ContentParser {
@@ -61,13 +56,13 @@ declare module '@vikhola/content-parser' {
          * 
          * @param key The `Content-Type` header or corresponding to it RegExp.
          */
-        get(key: string | RegExp): IContentParserStrategy
+        get(key: string | RegExp): ContentParserStrategy
         /**
          * The `parser.set()` method binds the strategy for the passed key.
          * 
          * @param key The `Content-Type` header or corresponding to it RegExp.
          */
-        set(key: string | RegExp, strategy: IContentParserStrategy): this
+        set(key: string | RegExp, strategy: ContentParserStrategy): this
         /**
          * The `parser.has()` method checks whether any strategy is associated with the passed key.
          * 
@@ -87,25 +82,13 @@ declare module '@vikhola/content-parser' {
          */
         clear(): void
         /**
-         * The `parser.parse()` method parses body of the provided event using a strategy whose key exactly or as closely as possible matches the `Content-Type` of the request.
-         * 
-         * @param request Request with metadata. 
-         * @param source Source to parse.
-         */
-        parse(event: IServerParseEvent): void | Promise<void>
-        /**
-         * The `parser.subscribe()` method subscribes to the event target `kernel.parse` event with provided optional priority.
+         * The `parser.parse()` method subscribes  with the provided parameters to the target `kernel.parse` event, 
+         * during which parses its body using a strategy whose key matches exactly or as closely as possible the `Content-Type` of the request.
          * 
          * @param target Target to subscribe.
-         * @param priority The listener priority.
+         * @param options The listener options.
          */
-        subscribe(target: IEventTarget, priority: number): void
-        /**
-         * The `parser.unsubscribe()` method unsubscribes from the `kernel.parse` event.
-         * 
-         * @param target Target to unsubscribe.
-         */
-        unsubscribe(target: IEventTarget): void
+        parse(target: KernelEmitter, options: ListenerOptions): void
     }
 
 }

@@ -3,7 +3,7 @@
 const assert = require('node:assert');
 const { describe, it } = require('node:test');
 const { Readable } = require('stream');
-const { ContentParserStrategy, TextContentParserStrategy, JSONContentParserStrategy } = require('../lib/strats.js');
+const { BaseContentParserStrategy, TextContentParserStrategy, JSONContentParserStrategy } = require('../lib/strats.js');
 
 const data = [ Buffer.from('t'), Buffer.from('e'), Buffer.from('s'), Buffer.from('t') ]
 const strData = 'test'
@@ -17,19 +17,19 @@ class RequestMock {
 
 }
 
-describe("ContentParserStrategy test", async function() {
+describe("BaseContentParserStrategy test", async function() {
 
     it('constuctor', function() {
-        assert.throws(_ => new ContentParserStrategy({ type: "Array" }), { message: 'Strategy "type" should be "string" or "buffer".' })
-        assert.doesNotThrow(_ => new ContentParserStrategy({ type: "string" }), { message: 'Strategy "type" should be "string" or "buffer".' })
-        assert.doesNotThrow(_ => new ContentParserStrategy({ type: "buffer" }), { message: 'Strategy "type" should be "string" or "buffer".' })
+        assert.throws(_ => new BaseContentParserStrategy({ type: "Array" }), { message: 'Strategy "type" should be "string" or "buffer".' })
+        assert.doesNotThrow(_ => new BaseContentParserStrategy({ type: "string" }), { message: 'Strategy "type" should be "string" or "buffer".' })
+        assert.doesNotThrow(_ => new BaseContentParserStrategy({ type: "buffer" }), { message: 'Strategy "type" should be "string" or "buffer".' })
     })
 
     describe('"parse" method', function() {
 
         it('should parse plain text body', async function() {
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy({ limit: 10 })
+            const aStrategy = new BaseContentParserStrategy({ limit: 10 })
 
             aBody.pause()
             aBody.on("data", (chunk) => {
@@ -42,7 +42,7 @@ describe("ContentParserStrategy test", async function() {
 
         it('should parse binary body', async function() {
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy({ limit: 10 })
+            const aStrategy = new BaseContentParserStrategy({ limit: 10 })
 
             aBody.pause()
             aBody.on("data", (chunk) => {
@@ -55,7 +55,7 @@ describe("ContentParserStrategy test", async function() {
 
         it('should parse body as string', async function() {
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy({ limit: 10, type: 'string' })
+            const aStrategy = new BaseContentParserStrategy({ limit: 10, type: 'string' })
 
             aBody.pause()
             aBody.on("data", (chunk) => {
@@ -68,7 +68,7 @@ describe("ContentParserStrategy test", async function() {
 
         it("should remove parser listeners from the request body after end", async function() {
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy({ limit: 10 })
+            const aStrategy = new BaseContentParserStrategy({ limit: 10 })
 
             await aStrategy.parse(new RequestMock, aBody)
 
@@ -81,7 +81,7 @@ describe("ContentParserStrategy test", async function() {
         it("should throw an Error that occurs while parsing request body", async function() {
             const anError = new Error("expected")
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy()
+            const aStrategy = new BaseContentParserStrategy()
 
             aBody.on("resume", _ => process.nextTick(_ => aBody.emit("error", anError)))
 
@@ -90,7 +90,7 @@ describe("ContentParserStrategy test", async function() {
 
         it('shoud throw an Error when the request was aborted while parsing', async function() {
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy()
+            const aStrategy = new BaseContentParserStrategy()
 
             aBody.on('resume', _ => process.nextTick(_ => aBody.emit('aborted')))
 
@@ -102,7 +102,7 @@ describe("ContentParserStrategy test", async function() {
 
         it('shoud throw an Error when the request body actual length is larger than its "Content-Length" header', async function() {
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy()
+            const aStrategy = new BaseContentParserStrategy()
             const aContentLength = 3
 
             await assert.rejects(
@@ -113,7 +113,7 @@ describe("ContentParserStrategy test", async function() {
 
         it('shoud throw an Error when the request body actual length is less than its "Content-Length" header', async function() {
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy()
+            const aStrategy = new BaseContentParserStrategy()
             const aContentLength = 10
 
             await assert.rejects(
@@ -124,7 +124,7 @@ describe("ContentParserStrategy test", async function() {
 
         it('shoud throw an Error when the request body "Content-Length" header is exceed limit', async function() {
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy({ limit: 4 })
+            const aStrategy = new BaseContentParserStrategy({ limit: 4 })
             const aContentLength = 10
 
             await assert.rejects(
@@ -135,7 +135,7 @@ describe("ContentParserStrategy test", async function() {
 
         it('shoud throw an Error when the request body actual length is exceed limit', async function() {
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy({ limit: 3 })
+            const aStrategy = new BaseContentParserStrategy({ limit: 3 })
 
             await assert.rejects(
                 _ => aStrategy.parse(new RequestMock(), aBody),  
@@ -146,7 +146,7 @@ describe("ContentParserStrategy test", async function() {
 
         it("should remove parser listeners from the request body after Error throw", async function() {
             const aBody = Readable.from(data)
-            const aStrategy = new ContentParserStrategy()
+            const aStrategy = new BaseContentParserStrategy()
 
             aBody.on("resume", _ => process.nextTick(_ => aBody.emit("error", new Error('Oops'))))
 
