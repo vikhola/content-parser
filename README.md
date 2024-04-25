@@ -34,7 +34,7 @@ const parser = new ContentParser();
 
 parser.parse(server);
 
-server.post('/', (request) => {
+server.post('/', (ctx) => {
 	// some logic	
 });
 ```
@@ -46,7 +46,7 @@ parser.parse(server);
 
 // POST / HTTP 1.1
 // Content-Type: 'application/json; foo=bar; bar=foo'
-server.post('/', (request) => {
+server.post('/', (ctx) => {
 	// some logic	
 });
 ```
@@ -82,9 +82,9 @@ parser.set('application/xml; foo=bar; bar=baz', strategyTwo);
 
 // POST / HTTP 1.1
 // Content-Type: 'application/xml; foo=bar; bar=foo'
-server.post('/', (request) => {
+server.post('/', (ctx) => {
 	// print: bar
-	console.log(request.body);
+	console.log(ctx.request.body);
 });
 ```
 
@@ -97,9 +97,9 @@ parser.set('*', strategy);
 
 // POST / HTTP 1.1
 // Content-Type: 'application/xml; foo=bar; bar=foo'
-server.post('/', (request) => {
+server.post('/', (ctx) => {
 	// print: bar
-	console.log(request.body);
+	console.log(ctx.request.body);
 });
 ```
 
@@ -193,9 +193,9 @@ parser.set('application/xml', strategy);
 
 // POST / HTTP 1.1
 // Content-Type: 'application/xml'
-server.post('/', (request) => {
+server.post('/', (ctx) => {
 	// print: bar
-	console.log(request.body);
+	console.log(ctx.request.body);
 });
 ```
 
@@ -214,7 +214,7 @@ parser.clear();
 console.log(parser.has('application/xml'));
 ```
 
-## ContentParserStrategies
+## ContentParserStrategy
 
 Except parser, module also exports a default strategy and its more specialized versions as `JSONContentParserStrategy` and `TextContentParserStrategy` which helps parse the provided request body and return a promise with its contents. The strategy accepts an optional `limit` and `type` parameters.
 
