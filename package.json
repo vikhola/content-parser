@@ -1,6 +1,6 @@
 {
   "name": "@vikhola/content-parser",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Provides a simple infrastructure vikhola framework module for parsing request content",
   "main": "index.js",
   "directories": {
