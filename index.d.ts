@@ -88,7 +88,7 @@ declare module '@vikhola/content-parser' {
          * @param target Target to subscribe.
          * @param options The listener options.
          */
-        parse(target: KernelEmitter, options: ListenerOptions): void
+        parse(target: KernelEmitter, options?: ListenerOptions): void
     }
 
 }
